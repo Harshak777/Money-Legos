@@ -62,31 +62,16 @@ export default class AddProject extends Component {
     event.preventDefault()
 
     const project = {
+        _id : this.props.match.params.id,
         projectname: this.state.projectname,
         description: this.state.description,
         deadline: this.state.deadline,
         fund: this.state.fund
       };
 
-    var ip ={hash:100}
-    var buf = new Buffer(JSON.stringify(project ))
-    const result = await ipfs.files.add(buf)
-    ip.hash = await result[0].hash
-    console.log('ifpsHash', ip)
-
-    axios.post('http://localhost:5000/', ip)
+      axios.post('http://localhost:5000/project/add', project)
       .then(res => console.log(res.data));
-    window.location = "/"+this.props.match.params.id+"/manage"
-    //console.log(this.props.match.params.id)
 
-    /*const ipfsPath = "QmUEQeuA7yXs7fYg4ZkFKdxSNGtwUyZQXhQRystW3ntj7o"
-    ipfs.files.cat(ipfsPath, function(err,filestream){
-        if(err) {
-            console.error(err)
-            return
-        }
-        console.log(JSON.parse(filestream.toString('utf8')))
-    })*/
 
   }
 

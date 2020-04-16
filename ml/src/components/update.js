@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import ipfs from '../ipfs'; 
 
 export default class Update extends Component {
@@ -21,16 +22,19 @@ export default class Update extends Component {
     }
   }
 
-  async componentDidMount() {
-    var id = this.props.match.params.id
-    var ipfsPath = "QmUJ2ummnWoJLHWX6qoavDthzc5nitgPCcAJoHMB45mDE9"
-    const result1 = await ipfs.files.cat(ipfsPath)
-    const o1 = await JSON.parse(result1.toString('utf8'))[id]
-    ipfsPath = o1
-    const result = await ipfs.files.cat(ipfsPath)
-    const o = await JSON.parse(result.toString('utf8'))
-    console.log(o);
-    this.setState({projectname:o.projectname,description:o.description,deadline:o.deadline,fund:o.fund})
+  componentDidMount() {
+    axios.get('http://localhost:5000/project/'+this.props.match.params.id)
+      .then(response => {
+        this.setState({
+          projectname: response.data.projectname,
+          description: response.data.description,
+          deadline: response.data.deadline,
+          fund: response.data.fund
+        })   
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
   }
 
   onChangeProjectName(e){
@@ -68,31 +72,18 @@ export default class Update extends Component {
   onSubmit(event) {
     event.preventDefault()
 
-    /*const project = {
-        projectname: this.state.projectname,
-        description: this.state.description,
-        deadline: this.state.deadline,
-        fund: this.state.fund
-      };
-      ipfs.files.add(buf, (error, result) => {
-      if(error) {
-        console.error(error)
-        return
-      }
-      this.setState({ ipfsHash: result[0].hash })
-      console.log('ifpsHash', this.state.ipfsHash)
-    })*/
-    
-    //console.log(this.props.match.params.id)
+    const project = {
+      _id : this.props.match.params.id,
+      projectname: this.state.projectname,
+      description: this.state.description,
+      deadline: this.state.deadline,
+      fund: this.state.fund
+    };
+    let manage = 'manage'
+    axios.post('http://localhost:5000/project/update', project)
+    .then(res => console.log(res.data));
 
-    /*const ipfsPath = "QmUEQeuA7yXs7fYg4ZkFKdxSNGtwUyZQXhQRystW3ntj7o"
-    ipfs.files.cat(ipfsPath, function(err,filestream){
-        if(err) {
-            console.error(err)
-            return
-        }
-        console.log(JSON.parse(filestream.toString('utf8')))
-    })*/
+    window.location = manage
 
   }
 

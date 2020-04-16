@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import ipfs from "../ipfs";
 import axios from 'axios';
 
-export default class CreateExercise extends Component {
+export default class Contributor extends Component {
   constructor(props) {
     super(props);
 
     this.componentDidMount = this.componentDidMount.bind(this);
+    this.onChangeContribute = this.onChangeContribute.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
 
     this.state = {
       projectname: '',
@@ -20,8 +22,28 @@ export default class CreateExercise extends Component {
   }
 
 
- 
+  onChangeContribute(e){
+    this.setState(
+      {
+          contribute: e.target.value
+      }
+    )
+  }
 
+  onSubmit(e){
+    e.preventDefault()
+    const project = {
+      _id : this.props.match.params.id,
+      projectname: this.state.projectname,
+      description: this.state.description,
+      deadline: this.state.deadline,
+      fund: this.state.fund - this.state.contribute
+    };
+
+    axios.post('http://localhost:5000/project/update', project)
+    .then(res => console.log(res.data));
+    window.location = ''
+  }
 
   componentDidMount(){
     axios.get('http://localhost:5000/project/'+this.props.match.params.id)
@@ -52,6 +74,20 @@ export default class CreateExercise extends Component {
       <h1>{"fund:"+fund}</h1>
       <Link to={"/"+this.props.match.params.id+"/add-project" }>Add Project</Link>
       <Link to={"/"+this.props.match.params.id+"/edit" }>Edit Project</Link>
+      <form onSubmit={this.onSubmit}>
+        <div className="form-group">
+          <label>Contribute (in ETH): </label>
+          <input 
+              type="text" 
+              className="form-control"
+              value={this.state.contribute}
+              onChange={this.onChangeContribute}
+              />
+        </div>
+        <div className="form-group">
+          <input type="submit" value="contribute" className="btn btn-primary" />
+        </div>
+      </form>
     </div>
     )
   }

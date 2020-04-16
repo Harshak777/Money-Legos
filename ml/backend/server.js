@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -8,19 +10,19 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-var hash=1;
+const uri = process.env.ATLAS_URI;
+mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true});
 
-app.post("/", (req, res) => {
-	//res.send({ message: "We did it!" });
-	hash = req.body.hash
-	console.log(hash)
-  });
+const connection = mongoose.connection;
+connection.once('open', () =>{
+    console.log('MongoDB connection established');
+})
 
+const projectRouter = require('./routes/project.js');
+//const exercisesRouter = require('./routes/exercises.js');
 
-app.post("/hash", (req, res) => {
-	res.send({hash:hash});
-	//console.log(hash)
-  });
+app.use('/project',projectRouter);
+//app.use('/exercises',exercisesRouter);
 
 app.listen(port, () => {
     console.log(`server is listning on port ${port}`);
